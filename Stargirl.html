@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Stargirl</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Fraunces:ital,wght@0,400;0,600;1,500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg: #2b1420;
+    --bg2: #38192a;
+    --card: #3a1a2c;
+    --line: #5c2d47;
+    --text: #ffeef4;
+    --muted: #cf94ac;
+    --pink: #ff6f9c;
+    --pink-soft: #ffb3c9;
+    --pink-deep: #ff3d78;
+  }
+  html, body{ height: 100%; }
+  *{ box-sizing: border-box; }
+  body{
+    margin:0;
+    min-height:100%;
+    background: radial-gradient(circle at 15% 10%, #4a2038 0%, transparent 45%),
+      radial-gradient(circle at 85% 90%, #401b30 0%, transparent 50%),
+      var(--bg);
+    color: var(--text);
+    font-family: "Space Mono", monospace;
+    display:flex;
+    align-items:flex-start;
+    justify-content:center;
+    padding: max(24px, env(safe-area-inset-top,0px)) 16px max(24px, env(safe-area-inset-bottom,0px));
+}
+  .window{
+    width: 100%;
+    max-width: 640px;
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    box-shadow: 0 40px 80px -30px rgba(0,0,0,.6);
+    overflow: hidden;
+  }
+  .titlebar{
+    display:flex;
+    align-items:center;
+    gap:8px;
+    padding: 12px 14px;
+    background: var(--bg2);
+    border-bottom: 1px solid var(--line);
+  }
+  .dot{ width:11px; height:11px; border-radius:50%; }
+  .dot.r{ background:#ff5f78; }
+  .dot.y{ background:#ffc2d6; }
+  .dot.g{ background:#ff8fb3; }
+  .fname{
+    margin-left: 8px;
+    font-size: 12px;
+    color: var(--muted);
+    letter-spacing: .02em;
+  }
+
+  /* subtle shuffling photo strip, tucked into the titlebar */
+  .photos{
+    margin-left: auto;
+    display: flex;
+    align-items: center;
+  }
+  .photo-frame{
+    position: relative;
+    width: 64px;
+    height: 64px;
+    border-radius: 10px;
+    overflow: hidden;
+    border: 1px solid var(--line);
+    background: linear-gradient(135deg, #5c2d47, #3a1a2c);
+    flex: 0 0 auto;
+    z-index: 5;
+}
+  .photo-frame img{
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    opacity: 0;
+    z-index: 1;
+    transition: opacity 1.1s ease;
+  }
+  .photo-frame img.active{
+    z-index: 2;
+}
+  .photo-frame img.active{ opacity: 1; }
+  .photo-frame .ph-fallback{
+    position:absolute; inset:0;
+    display:flex; align-items:center; justify-content:center;
+    font-size: 11px;
+    color: var(--pink-soft);
+    opacity: .8;
+  }
+
+  .term{
+    padding: 22px 22px 6px;
+    font-size: 13px;
+    line-height: 1.65;
+    min-height: 150px;
+  }
+  .term .muted{ color: var(--muted); }
+  .term .ok{ color: var(--pink-soft); }
+  .term .tag{ color: var(--pink); }
+  .cursor{
+    display:inline-block;
+    width: 7px; height: 14px;
+    background: var(--pink);
+    vertical-align: -2px;
+    animation: blink 1s steps(1) infinite;
+  }
+  @keyframes blink{ 50%{ opacity:0; } }
+
+  .content{
+    padding: 4px 28px 32px;
+    opacity: 0;
+    transform: translateY(8px);
+    transition: opacity .5s ease, transform .5s ease;
+  }
+  .content.show{ opacity:1; transform:none; }
+
+  h1{
+    font-family: "Fraunces", serif;
+    font-style: italic;
+    font-weight: 500;
+    font-size: clamp(26px, 6vw, 34px);
+    line-height: 1.15;
+    margin: 6px 0 14px;
+    color: var(--text);
+  }
+  p{
+    font-family: "Fraunces", serif;
+    font-size: 16.5px;
+    line-height: 1.6;
+    color: #ffd9e6;
+    margin: 0 0 14px;
+    max-width: 60ch;
+  }
+  .note{
+    font-family: "Space Mono", monospace;
+    font-size: 12.5px;
+    color: var(--muted);
+    border-left: 2px solid var(--pink);
+    padding: 8px 0 8px 12px;
+    margin: 18px 0 22px;
+  }
+
+  .quiz{
+    margin-top: 22px;
+    padding-top: 20px;
+    border-top: 1px dashed var(--line);
+  }
+  .qtitle{
+    font-size: 12.5px;
+    color: var(--muted);
+    margin-bottom: 10px;
+  }
+  .qtext{
+    font-family: "Fraunces", serif;
+    font-size: 20px;
+    margin-bottom: 16px;
+  }
+
+  .stars{
+    display:flex;
+    gap: 8px;
+  }
+  .star{
+    font-size: 30px;
+    line-height: 1;
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: var(--line);
+    padding: 2px;
+    transition: transform .15s ease, color .2s ease;
+  }
+  .star.filled{ color: var(--pink); }
+  .stars.shake{ animation: shake .35s ease; }
+  @keyframes shake{
+    20%{ transform: translateX(-4px); }
+    40%{ transform: translateX(4px); }
+    60%{ transform: translateX(-3px); }
+    80%{ transform: translateX(3px); }
+  }
+
+  .caption{
+    font-size: 11.5px;
+    color: var(--pink-soft);
+    margin-top: 10px;
+    min-height: 16px;
+  }
+  .result{
+    display:none;
+    font-family: "Fraunces", serif;
+    font-style: italic;
+    font-size: 18px;
+    color: var(--pink-soft);
+    margin-top: 14px;
+  }
+  .result.show{ display:block; }
+
+  .footer{
+    font-size: 11px;
+    color: #8a4d69;
+    margin-top: 26px;
+    letter-spacing: .02em;
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    .content{ transition:none; }
+    .star{ transition:none; }
+    .stars.shake{ animation:none; }
+  }
+</style>
+</head>
+<body>
+
+<div class="window">
+  <div class="titlebar">
+    <span class="dot r"></span><span class="dot y"></span><span class="dot g"></span>
+    <span class="fname">~/us/session_03.py — running</span>
+    <div class="photos" id="photos"></div>
+  </div>
+
+  <div class="term" id="term"></div>
+
+  <div class="content" id="content">
+    <h1>Stargirl tshanga</h1>
+    <p>Round 3 of us talking, and I still open every conversation like I'm debugging something important. Some things don't change 
+      </p>
+    <p>Also, in the spirit of full disclosure: I built this instead of just texting you, because I'm an engineer and engineers don't send a message when they can send a <em>deployment</em>.</p>
+
+    <div class="note">
+      quick note from the dev team: no need to overthink the small talk this time &mdash; we already did onboarding, ran the whole beta together, beeeen through the integration testing. we can just pick up where the build left off.
+    </div>
+
+    <div class="quiz">
+      <div class="qtitle">// required field before you can exit this page</div>
+      <div class="qtext">Select the number of stars of how excited you are were speaking again</div>
+      <div class="stars" id="stars">
+        <button class="star" data-v="1">★</button>
+        <button class="star" data-v="2">★</button>
+        <button class="star" data-v="3">★</button>
+        <button class="star" data-v="4">★</button>
+        <button class="star" data-v="5">★</button>
+      </div>
+      <div class="caption" id="caption"></div>
+      <div class="result" id="result">rating locked in at 5/5. system does not accept anything lower.</div>
+    </div>
+
+    <div class="footer">error 200: feelings found. this form cannot be submitted without you.</div>
+  </div>
+</div>
+
+<script>
+  /* ====== ADD YOUR PHOTOS HERE ======
+     Paste image URLs or base64 data-URIs into this array.
+     They stay small (26x26) and shuffle every few seconds in the titlebar.
+     Leave empty and it'll just show a subtle pink placeholder instead. */
+  const photos = [
+    // "https://example.com/photo1.jpg",
+    // "data:image/jpeg;base64,....."
+    "img/img1.JPG",
+    "img/img2.jpg",
+    "img/img3.JPG",
+    "img/img4.jpg",
+    "img/img5.jpg",
+    "img/img6.jpg",
+    "img/img7.jpg",
+    "img/img8.jpg",
+  ];
+
+  const photoBox = document.getElementById("photos");
+  if (photos.length){
+    const frame = document.createElement("div");
+    frame.className = "photo-frame";
+    photos.forEach((src, i) => {
+      const img = document.createElement("img");
+      img.src = src;
+      if (i === 0) img.classList.add("active");
+      frame.appendChild(img);
+    });
+    photoBox.appendChild(frame);
+    if (photos.length > 1){
+      let idx = 0;
+      setInterval(() => {
+        const imgs = frame.querySelectorAll("img");
+        imgs[idx].classList.remove("active");
+        idx = (idx + 1) % imgs.length;
+        imgs[idx].classList.add("active");
+      }, 3200);
+    }
+  } else {
+    const frame = document.createElement("div");
+    frame.className = "photo-frame";
+    frame.innerHTML = '<div class="ph-fallback">♡</div>';
+    photoBox.appendChild(frame);
+  }
+
+  const lines = [
+    { text: "$ ./resume_conversation.sh --attempt 3", cls: "" },
+    { text: "loading modules: robotics, embedded systems, mild nervousness...", cls: "muted" },
+    { text: "[ok] charm.exe compiled with 0 errors, several warnings", cls: "ok" },
+    { text: "[note] previous sessions (1, 2) found in history — resuming, not restarting", cls: "tag" }
+  ];
+
+  const term = document.getElementById("term");
+  const content = document.getElementById("content");
+
+  async function typeLine(line){
+    const row = document.createElement("div");
+    row.className = line.cls;
+    term.appendChild(row);
+    for (const ch of line.text){
+      row.textContent += ch;
+      await new Promise(r => setTimeout(r, 14));
+    }
+  }
+
+  async function boot(){
+    for (const line of lines){
+      await typeLine(line);
+      await new Promise(r => setTimeout(r, 140));
+    }
+    const cur = document.createElement("span");
+    cur.className = "cursor";
+    term.appendChild(cur);
+    await new Promise(r => setTimeout(r, 400));
+    content.classList.add("show");
+  }
+  boot();
+
+  // rigged star rating — anything under 5 snaps back to 5
+  const starsEl = document.getElementById("stars");
+  const stars = Array.from(document.querySelectorAll(".star"));
+  const caption = document.getElementById("caption");
+  const result = document.getElementById("result");
+
+  const rigLines = [
+    "nice try",
+    "404: low rating not found",
+    "access denied",
+    "outlier removed for data integrity",
+    "compiler auto-corrected that for you",
+    "still not letting you rate less than 5"
+  ];
+  let attempts = 0;
+
+  function setStars(n){
+    stars.forEach(s => s.classList.toggle("filled", Number(s.dataset.v) <= n));
+  }
+
+  stars.forEach(star => {
+    star.addEventListener("click", () => {
+      const v = Number(star.dataset.v);
+      if (v < 5){
+        caption.textContent = rigLines[attempts % rigLines.length];
+        attempts++;
+        starsEl.classList.remove("shake");
+        void starsEl.offsetWidth;
+        starsEl.classList.add("shake");
+        setTimeout(() => setStars(5), 220);
+      } else {
+        caption.textContent = "";
+        setStars(5);
+        result.classList.add("show");
+      }
+    });
+  });
+</script>
+
+</body>
+</html>
